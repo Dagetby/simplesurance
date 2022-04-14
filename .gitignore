@@ -1,0 +1,15 @@
+# directory structure
+bin/*
+pkg/*
+!.gitkeep
+
+# goop - go package manager
+.vendor
+
+## Directory-based project format:
+.idea/
+
+
+.DS_Store
+.AppleDouble
+.LSOverride
