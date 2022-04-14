@@ -44,27 +44,20 @@ func MustCounter(ctx context.Context, path string) *Counter {
 }
 
 // CountRequests Count correct requests and delete expired
-func (c Counter) CountRequests(requestTime time.Time) (int, error) {
-	count := len(c.dates)
-
-	if len(c.dates) == 0 {
-		c.mu.Lock()
-		c.dates = append(c.dates, requestTime)
-		c.mu.Unlock()
-	}
-
+func (c *Counter) CountRequests(requestTime time.Time) (int, error) {
+	indx := 0
 	for i := len(c.dates) - 1; i >= 0; i-- {
 		if requestTime.Sub(c.dates[i]) > cutTime {
-			c.mu.Lock()
-
-			c.dates = c.dates[i:]
-			count -= i + 1
-			c.dates = append(c.dates, requestTime)
-
-			c.mu.Unlock()
+			indx = i
 			break
 		}
 	}
+
+	c.mu.Lock()
+	c.dates = c.dates[indx:]
+	count := len(c.dates)
+	c.dates = append(c.dates, requestTime)
+	c.mu.Unlock()
 
 	err := c.updateFile()
 	if err != nil {
